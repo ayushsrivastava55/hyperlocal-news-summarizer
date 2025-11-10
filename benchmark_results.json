@@ -1,0 +1,26 @@
+[
+  {
+    "model": "facebook/bart-large-cnn",
+    "device": "cpu",
+    "num_samples": 6,
+    "load_time_sec": 1.738,
+    "avg_in_chars": 298.8,
+    "avg_out_chars": 206.2,
+    "avg_compression": 0.69,
+    "avg_latency_sec_per_sample": 19.42,
+    "total_time_sec": 116.522,
+    "throughput_samples_per_min": 3.09
+  },
+  {
+    "model": "sshleifer/distilbart-cnn-12-6",
+    "device": "cpu",
+    "num_samples": 6,
+    "load_time_sec": 3.942,
+    "avg_in_chars": 298.8,
+    "avg_out_chars": 230.0,
+    "avg_compression": 0.77,
+    "avg_latency_sec_per_sample": 3.366,
+    "total_time_sec": 20.193,
+    "throughput_samples_per_min": 17.83
+  }
+]

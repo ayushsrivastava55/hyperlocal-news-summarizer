@@ -36,79 +36,97 @@ class HyperlocalNewsWorkflow:
         self.voice_synthesizer = VoiceSynthesizer()
         self.target_languages = target_languages
     
-    def process_single_article(self, article: Dict) -> Dict:
+    def process_single_article(self, article: Dict, target_language: str = 'en') -> Dict:
         """
         Process a single article through the complete pipeline
         
         Args:
             article: Raw article dictionary
+            target_language: Single target language code (e.g., 'en', 'hi', 'mr')
             
         Returns:
             Fully processed article with all features
         """
         logger.info(f"Processing article: {article.get('title', 'Unknown')[:50]}...")
         
-        # Step 1: Translate to target languages
-        translated_article = self.translator.translate_article(
-            article, 
-            self.target_languages
-        )
+        # Step 1: Translate article to target language only (if not English)
+        # IMPORTANT: Always preserve original English content for NLP processing
+        if target_language != 'en':
+            translated_article = self.translator.translate_article(
+                article, 
+                [target_language]  # Only translate to selected language
+            )
+            # Ensure English content is preserved for NLP processing
+            if 'translations' not in translated_article:
+                translated_article['translations'] = {}
+            translated_article['translations']['en'] = {
+                'title': article.get('title', ''),
+                'description': article.get('description', '')
+            }
+        else:
+            translated_article = article.copy()
+            translated_article['translations'] = {}
+            translated_article['translations']['en'] = {
+                'title': article.get('title', ''),
+                'description': article.get('description', '')
+            }
         
-        # Step 2: Generate summary and extract entities
+        # Step 2: Generate summary and extract entities (always in English for better NLP)
         processed_article = self.nlp_processor.process_article(
             translated_article,
             target_language='en'  # Process in English for better NLP results
         )
-        # Translate summary to target languages for multi-language display
-        try:
-            ai_summary_en = processed_article.get('ai_summary', '')
-            if ai_summary_en:
-                # Ensure translations dict exists
-                if 'translations' not in processed_article:
-                    processed_article['translations'] = {}
-                # English summary
-                processed_article['translations'].setdefault('en', {})
-                processed_article['translations']['en']['summary'] = ai_summary_en
-                # Other languages
-                for lang in self.target_languages:
-                    if lang == 'en':
-                        continue
-                    try:
-                        trans = self.translator.translate_text(ai_summary_en, target_lang=lang, source_lang='en')
-                        processed_article['translations'].setdefault(lang, {})
-                        processed_article['translations'][lang]['summary'] = trans.get('translated_text', ai_summary_en)
-                    except Exception:
-                        # Skip on per-language failure
-                        continue
-        except Exception:
-            pass
         
-        # Step 3: Geo-tag the article
+        # Step 3: Translate summary to target language only
+        ai_summary_en = processed_article.get('ai_summary', '')
+        if ai_summary_en:
+            if 'translations' not in processed_article:
+                processed_article['translations'] = {}
+            
+            # Store English summary
+            processed_article['translations'].setdefault('en', {})
+            processed_article['translations']['en']['summary'] = ai_summary_en
+            
+            # Translate summary to target language if not English
+            if target_language != 'en':
+                try:
+                    trans = self.translator.translate_text(ai_summary_en, target_lang=target_language, source_lang='en')
+                    processed_article['translations'].setdefault(target_language, {})
+                    processed_article['translations'][target_language]['summary'] = trans.get('translated_text', ai_summary_en)
+                except Exception as e:
+                    logger.warning(f"Failed to translate summary to {target_language}: {e}")
+                    # Fallback to English summary
+                    processed_article['translations'].setdefault(target_language, {})
+                    processed_article['translations'][target_language]['summary'] = ai_summary_en
+        
+        # Step 4: Geo-tag the article
         geo_tagged = self.geo_tagger.tag_article(
             processed_article,
             entities=processed_article,
             fast=self.fast_mode
         )
         
-        # Step 4: Generate voice summaries
-        final_article = self.voice_synthesizer.generate_multilingual_audio(
-            geo_tagged,
-            languages=self.target_languages,
-            skip=self.fast_mode
-        )
+        # Step 5: Skip audio generation (not needed - text only)
+        # Audio generation removed - summaries displayed as text in UI
         
         # Add metadata
-        final_article['processed_at'] = datetime.now().isoformat()
-        final_article['workflow_version'] = '1.0'
+        geo_tagged['processed_at'] = datetime.now().isoformat()
+        geo_tagged['workflow_version'] = '1.0'
+        geo_tagged['target_language'] = target_language  # Store selected language
         
-        return final_article
+        return geo_tagged
     
-    def process_feeds(self, feed_configs: List[Dict] = None, limit_per_feed: int = 5, max_total: int = None, seen_links: Optional[Set[str]] = None, offset: int = 0) -> List[Dict]:
+    def process_feeds(self, feed_configs: List[Dict] = None, limit_per_feed: int = 5, max_total: int = None, seen_links: Optional[Set[str]] = None, offset: int = 0, target_language: str = 'en') -> List[Dict]:
         """
         Process multiple feeds through the complete pipeline
         
         Args:
             feed_configs: List of feed configurations (uses default if None)
+            limit_per_feed: Maximum articles per feed
+            max_total: Maximum total articles to process
+            seen_links: Set of already-seen article links
+            offset: Number of articles to skip
+            target_language: Single target language code (e.g., 'en', 'hi', 'mr')
             
         Returns:
             List of fully processed articles
@@ -150,13 +168,13 @@ class HyperlocalNewsWorkflow:
             deduped = deduped[:max_total]
         logger.info(f"After dedupe/filter: {len(deduped)} articles remaining")
         
-        # Step 2: Process each article
+        # Step 2: Process each article (use deduped list, not raw_articles)
         processed_articles = []
-        for i, article in enumerate(raw_articles, 1):
+        for i, article in enumerate(deduped, 1):
             try:
-                processed = self.process_single_article(article)
+                processed = self.process_single_article(article, target_language=target_language)
                 processed_articles.append(processed)
-                logger.info(f"Processed article {i}/{len(raw_articles)}")
+                logger.info(f"Processed article {i}/{len(deduped)}")
             except Exception as e:
                 logger.error(f"Error processing article {i}: {str(e)}")
                 continue

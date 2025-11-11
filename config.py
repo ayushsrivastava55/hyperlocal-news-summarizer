@@ -52,9 +52,9 @@ FLASK_HOST = '0.0.0.0'
 FLASK_PORT = 5000
 FLASK_DEBUG = True
 
-# Summary parameters
-SUMMARY_MAX_LENGTH = 100
-SUMMARY_MIN_LENGTH = 30
+# Summary parameters (1-2 paragraphs ~ 100-200 words)
+SUMMARY_MAX_LENGTH = 200
+SUMMARY_MIN_LENGTH = 80
 
 # NER model
 NER_MODEL = "en_core_web_sm"

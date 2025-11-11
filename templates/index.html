@@ -385,12 +385,124 @@
             padding: 25px;
             transition: all 0.3s;
             position: relative;
+            cursor: pointer;
         }
 
         .article-card:hover {
             transform: translateY(-5px);
             box-shadow: var(--shadow-lg);
             border-color: var(--primary);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            animation: slideUp 0.3s;
+            box-shadow: var(--shadow-lg);
+            margin: 20px;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--gray);
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .modal-close:hover {
+            background: var(--light);
+            color: var(--dark);
+        }
+
+        .modal-title {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 20px;
+            padding-right: 40px;
+        }
+
+        .modal-source {
+            display: inline-block;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--white);
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .modal-summary {
+            font-size: 1.1em;
+            line-height: 1.8;
+            color: var(--dark);
+            margin-bottom: 25px;
+            padding: 20px;
+            background: var(--light);
+            border-radius: 12px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .modal-section {
+            margin-bottom: 25px;
+        }
+
+        .modal-section-title {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+
+        .modal-text {
+            color: var(--gray);
+            line-height: 1.6;
         }
 
         .article-source {
@@ -618,33 +730,33 @@
     <div class="container">
         <!-- Header -->
         <div class="header fade-in">
-            <h1>📰 Hyperlocal News Summarizer</h1>
+            <h1>Hyperlocal News Summarizer</h1>
             <p>AI-Powered Community News Aggregation & Analysis</p>
         </div>
 
         <!-- Control Panel -->
         <div class="control-panel fade-in">
             <div class="control-header">
-                <div class="control-title">⚡ Quick Actions</div>
+                <div class="control-title">Quick Actions</div>
                 <div class="btn-group">
                     <button class="btn btn-primary" onclick="processFeeds()">
-                        <span>🔄</span> Process Feeds
+                        Process Feeds
                     </button>
                     <button class="btn btn-success" onclick="generateReport()">
-                        <span>📊</span> Report
+                        Report
                     </button>
                     <button class="btn btn-warning" onclick="resetHistory()">
-                        <span>🔄</span> Reset
+                        Reset
                     </button>
                     <button class="btn btn-danger" onclick="clearArticles()">
-                        <span>🗑️</span> Clear
+                        Clear
                     </button>
                 </div>
             </div>
 
             <!-- Search -->
             <div class="search-container">
-                <span class="search-icon">🔍</span>
+                <span class="search-icon">⌕</span>
                 <input type="text" 
                        id="searchBox" 
                        class="search-input" 
@@ -696,7 +808,7 @@
                 <div class="setting-item">
                     <label class="setting-label">Processing Mode</label>
                     <div class="toggle-container">
-                        <div class="toggle active" id="fastToggle" onclick="toggleFastMode()"></div>
+                        <div class="toggle" id="fastToggle" onclick="toggleFastMode()"></div>
                         <span class="setting-label" style="margin: 0;">Fast Mode</span>
                     </div>
                 </div>
@@ -704,7 +816,7 @@
 
             <!-- Feed Management -->
             <div class="setting-item" style="grid-column: 1 / -1;">
-                <label class="setting-label">📰 RSS Feeds</label>
+                <label class="setting-label">RSS Feeds</label>
                 
                 <!-- Pre-configured Feed Dropdown -->
                 <div style="margin-bottom: 15px;">
@@ -712,7 +824,7 @@
                         Quick Add: Select from Popular Indian News Sources
                     </label>
                     <select id="feedDropdown" class="setting-select" onchange="addFeedFromDropdown()" style="width: 100%;">
-                        <option value="">-- Select a News Source to Add (All Verified ✅) --</option>
+                        <option value="">-- Select a News Source to Add (All Verified) --</option>
                         <optgroup label="National News">
                             <option value="the_hindu">The Hindu - National</option>
                             <option value="zee_news">Zee News - India</option>
@@ -744,7 +856,7 @@
                 <!-- City-Based Discovery (SerpAPI) -->
                 <div style="margin-bottom: 12px;">
                     <label class="setting-label" style="font-size: 0.85em; color: var(--gray); margin-bottom: 8px;">
-                        Discover by City (uses SerpAPI if configured)
+                        Fetch News by City (uses SerpAPI if configured)
                     </label>
                     <div style="display:flex; gap:10px;">
                         <input type="text"
@@ -752,8 +864,7 @@
                                class="setting-input"
                                placeholder="Enter city name (e.g., Mumbai, Pune, Jaipur)"
                                style="flex:1;">
-                        <button class="btn btn-primary" onclick="discoverFeedsForCity()">🔎 Discover RSS</button>
-                        <button class="btn btn-success" onclick="fetchCityNewsViaSerpAPI()">📰 Fetch News</button>
+                        <button class="btn btn-success" onclick="fetchCityNewsViaSerpAPI()">Fetch News</button>
                     </div>
                     <div id="discoveredFeeds" style="margin-top:10px;"></div>
                 </div>
@@ -761,7 +872,7 @@
                 <!-- Active Feeds Display -->
                 <div class="feed-chips" id="feedChips"></div>
                 <div style="margin-top: 10px; font-size: 0.85em; color: var(--gray);">
-                    💡 Tip: Some feeds may be blocked by the source. Try different sources if one doesn't work.
+                    Tip: Some feeds may be blocked by the source. Try different sources if one doesn't work.
                 </div>
             </div>
         </div>
@@ -770,30 +881,30 @@
         <div class="stats-grid fade-in">
             <div class="stat-card">
                 <div class="stat-value" id="totalArticles">0</div>
-                <div class="stat-label">📰 Total Articles</div>
+                <div class="stat-label">Total Articles</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value" id="totalLanguages">0</div>
-                <div class="stat-label">🌐 Languages</div>
+                <div class="stat-label">Languages</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value" id="totalLocations">0</div>
-                <div class="stat-label">📍 Locations</div>
+                <div class="stat-label">Locations</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value" id="totalCategories">0</div>
-                <div class="stat-label">📂 Categories</div>
+                <div class="stat-label">Categories</div>
             </div>
         </div>
 
         <!-- Articles Section -->
         <div class="articles-section fade-in">
             <div class="section-header">
-                <div class="section-title">📑 Latest Articles</div>
+                <div class="section-title">Latest Articles</div>
             </div>
             <div id="articlesContainer">
                 <div class="empty-state">
-                    <div class="empty-icon">📭</div>
+                    <div class="empty-icon">--</div>
                     <div class="empty-title">No Articles Yet</div>
                     <div class="empty-text">Click "Process Feeds" to start collecting news articles</div>
                 </div>
@@ -801,9 +912,17 @@
         </div>
     </div>
 
+    <!-- Modal for Article Details -->
+    <div id="articleModal" class="modal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
     <script>
         let articles = [];
-        let fastMode = true;
+        let fastMode = false;
         let feedList = [
             { type: 'RSS', url: 'https://timesofindia.indiatimes.com/rssfeeds/-2128833038.cms', name: 'Times of India - Bengaluru' },
             { type: 'RSS', url: 'https://www.thehindu.com/news/national/feeder/default.rss', name: 'The Hindu - National' },
@@ -913,7 +1032,7 @@
             const chip = document.createElement('div');
             chip.className = 'chip';
             chip.style.background = 'linear-gradient(135deg, #10b981, #059669)';
-            chip.innerHTML = `<span>✅ Added: ${feed.name}</span>`;
+            chip.innerHTML = `<span>Added: ${feed.name}</span>`;
             document.getElementById('feedChips').appendChild(chip);
             
             setTimeout(() => {
@@ -961,7 +1080,7 @@
                 alert('Please enter a city name');
                 return;
             }
-            container.innerHTML = '<div style="color:#64748b;">🔎 Discovering feeds for ' + city + '...</div>';
+            container.innerHTML = '<div style="color:#64748b;">Discovering feeds for ' + city + '...</div>';
             try {
                 const resp = await fetch('/api/discover-feeds', {
                     method: 'POST',
@@ -970,7 +1089,7 @@
                 });
                 const data = await resp.json();
                 if (data.success && Array.isArray(data.feeds) && data.feeds.length) {
-                    let html = `<div style="margin-top:8px;"><strong>✅ Found ${data.feeds.length} feed(s) for ${city}:</strong></div>`;
+                    let html = `<div style="margin-top:8px;"><strong>Found ${data.feeds.length} feed(s) for ${city}:</strong></div>`;
                     data.feeds.forEach(feed => {
                         const safeName = (feed.name || feed.url);
                         const safeUrl = feed.url;
@@ -980,12 +1099,12 @@
                               <div style="font-weight:600; color:#1e293b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(safeName)}</div>
                               <div style="color:#64748b; font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(safeUrl)}</div>
                             </div>
-                            <button class="btn btn-success" style="padding:6px 10px; font-size:12px;" onclick="addDiscoveredFeed('${safeUrl.replace(/'/g, "\\'")}', '${safeName.replace(/'/g, "\\'")}')">➕ Add</button>
+                            <button class="btn btn-success" style="padding:6px 10px; font-size:12px;" onclick="addDiscoveredFeed('${safeUrl.replace(/'/g, "\\'")}', '${safeName.replace(/'/g, "\\'")}')">Add</button>
                           </div>`;
                     });
                     container.innerHTML = html;
                 } else {
-                    container.innerHTML = `<div style="margin-top:8px; color:#64748b;">⚠️ No RSS feeds found for "${escapeHtml(city)}". You can try "📰 Fetch News" instead.</div>`;
+                    container.innerHTML = `<div style="margin-top:8px; color:#64748b;">No RSS feeds found for "${escapeHtml(city)}". You can try "Fetch News" instead.</div>`;
                 }
             } catch (e) {
                 container.innerHTML = `<div style="margin-top:8px; color:#ef4444;">❌ Error: ${escapeHtml(e.message || String(e))}</div>`;
@@ -1004,7 +1123,7 @@
             const container = document.getElementById('discoveredFeeds');
             const msg = document.createElement('div');
             msg.style.cssText = 'margin-top:8px; padding:8px; background:#d1fae5; color:#065f46; border-radius:8px;';
-            msg.textContent = `✅ Added: ${name || url}`;
+            msg.textContent = `Added: ${name || url}`;
             container.appendChild(msg);
             setTimeout(() => msg.remove(), 2000);
         }
@@ -1015,28 +1134,29 @@
             const city = (cityInput.value || '').trim();
             const container = document.getElementById('discoveredFeeds');
             const fast = !!document.getElementById('fastToggle')?.classList.contains('active') || document.getElementById('fastToggle')?.checked;
+            const targetLanguage = document.getElementById('langSelect').value; // Get selected language
             if (!city) {
                 alert('Please enter a city name');
                 return;
             }
-            container.innerHTML = '<div style="color:#64748b;">📰 Fetching and processing news for ' + city + ' via SerpAPI...</div>';
+            container.innerHTML = '<div style="color:#64748b;">Fetching and processing news for ' + city + ' via SerpAPI...</div>';
             try {
                 const resp = await fetch('/api/serp-news', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ city, max_results: 10, process: true, fast })
+                    body: JSON.stringify({ city, max_results: 10, process: true, fast, target_language: targetLanguage })
                 });
                 const data = await resp.json();
                 if (data.success && Array.isArray(data.articles) && data.articles.length) {
                     articles = data.articles;
                     displayArticles();
                     updateStats();
-                    container.innerHTML = `<div style="margin-top:8px; color:#065f46; background:#d1fae5; padding:8px; border-radius:8px;">✅ Processed ${data.articles.length} article(s) for ${escapeHtml(city)}${data.fast_mode ? ' (fast mode)' : ''}.</div>`;
+                    container.innerHTML = `<div style="margin-top:8px; color:#065f46; background:#d1fae5; padding:8px; border-radius:8px;">Processed ${data.articles.length} article(s) for ${escapeHtml(city)}${data.fast_mode ? ' (fast mode)' : ''}.</div>`;
                 } else {
-                    container.innerHTML = `<div style="margin-top:8px; color:#64748b;">⚠️ No news returned for "${escapeHtml(city)}".</div>`;
+                    container.innerHTML = `<div style="margin-top:8px; color:#64748b;">No news returned for "${escapeHtml(city)}".</div>`;
                 }
             } catch (e) {
-                container.innerHTML = `<div style="margin-top:8px; color:#ef4444;">❌ Error: ${escapeHtml(e.message || String(e))}</div>`;
+                container.innerHTML = `<div style="margin-top:8px; color:#ef4444;">Error: ${escapeHtml(e.message || String(e))}</div>`;
             }
         }
         function removeFeed(index) {
@@ -1062,6 +1182,7 @@
             try {
                 const limit = parseInt(document.getElementById('limitSelect').value);
                 const maxTotal = parseInt(document.getElementById('maxTotalSelect').value);
+                const targetLanguage = document.getElementById('langSelect').value; // Get selected language
                 
                 const response = await fetch('/api/process', {
                     method: 'POST',
@@ -1071,7 +1192,8 @@
                         max_total: maxTotal,
                         fast: fastMode,
                         feed_configs: feedList,
-                        offset: 0
+                        offset: 0,
+                        target_language: targetLanguage  // Send selected language
                     })
                 });
 
@@ -1098,7 +1220,7 @@
             if (articles.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-icon">📭</div>
+                        <div class="empty-icon">--</div>
                         <div class="empty-title">No Articles Yet</div>
                         <div class="empty-text">Click "Process Feeds" to start</div>
                     </div>
@@ -1131,25 +1253,116 @@
             const location = article.primary_location?.name || '';
             const categories = article.suggested_categories || [];
             const tone = article.sentiment?.tone || 'Neutral';
-            const audioFiles = article.audio_files || {};
             const link = article.link || '#';
+
+            // Truncate summary for card display
+            const shortSummary = summary.length > 150 ? summary.substring(0, 150) + '...' : summary;
 
             card.innerHTML = `
                 <div class="article-source">${escapeHtml(source)}</div>
                 <div class="article-title">${escapeHtml(title)}</div>
-                <div class="article-summary">${escapeHtml(summary)}</div>
+                <div class="article-summary">${escapeHtml(shortSummary)}</div>
                 <div class="article-meta">
-                    ${location ? `<span class="tag tag-location">📍 ${escapeHtml(location)}</span>` : ''}
+                    ${location ? `<span class="tag tag-location">${escapeHtml(location)}</span>` : ''}
                     ${categories.slice(0, 2).map(cat => `<span class="tag tag-category">${escapeHtml(cat)}</span>`).join('')}
                     <span class="tag tag-tone">${escapeHtml(tone)}</span>
                 </div>
                 <div class="article-footer">
-                    ${audioFiles[lang] ? `<button class="audio-btn" onclick="playAudio('${audioFiles[lang]}')">🎵 Play ${lang.toUpperCase()}</button>` : ''}
-                    ${link !== '#' ? `<a href="${link}" target="_blank" class="link-btn">🔗 View Original</a>` : ''}
+                    ${link !== '#' ? `<a href="${link}" target="_blank" class="link-btn" onclick="event.stopPropagation()">View Original</a>` : ''}
                 </div>
             `;
 
+            // Make card clickable to open modal
+            card.onclick = () => openArticleModal(article, lang);
+
             return card;
+        }
+
+        // Open Article Modal
+        function openArticleModal(article, lang) {
+            const modal = document.getElementById('articleModal');
+            const modalBody = document.getElementById('modalBody');
+
+            const trans = article.translations?.[lang] || {};
+            const title = trans.title || article.title || 'Untitled';
+            const summary = trans.summary || article.ai_summary || trans.description || article.description || 'No summary';
+            const fullDescription = trans.description || article.description || 'No description available';
+            const source = article.source || 'Unknown';
+            const location = article.primary_location?.name || '';
+            const categories = article.suggested_categories || [];
+            const tone = article.sentiment?.tone || 'Neutral';
+            const link = article.link || '#';
+            const entities = article.named_entities || {};
+            const geoDisplay = article.geo_display || '';
+
+            // Build entities display
+            let entitiesHtml = '';
+            if (entities.PERSON && entities.PERSON.length) {
+                entitiesHtml += `<p><strong>People:</strong> ${entities.PERSON.slice(0, 5).join(', ')}</p>`;
+            }
+            if (entities.ORG && entities.ORG.length) {
+                entitiesHtml += `<p><strong>Organizations:</strong> ${entities.ORG.slice(0, 5).join(', ')}</p>`;
+            }
+            if ((entities.GPE || entities.LOC) && (entities.GPE?.length || entities.LOC?.length)) {
+                const locs = [...(entities.GPE || []), ...(entities.LOC || [])].slice(0, 5);
+                entitiesHtml += `<p><strong>Locations:</strong> ${locs.join(', ')}</p>`;
+            }
+
+            modalBody.innerHTML = `
+                <div class="modal-source">${escapeHtml(source)}</div>
+                <h2 class="modal-title">${escapeHtml(title)}</h2>
+
+                <div class="modal-section">
+                    <div class="modal-section-title">AI Summary</div>
+                    <div class="modal-summary">${escapeHtml(summary)}</div>
+                </div>
+
+                <div class="modal-section">
+                    <div class="modal-section-title">Full Description</div>
+                    <div class="modal-text">${escapeHtml(fullDescription)}</div>
+                </div>
+
+                ${entitiesHtml ? `
+                <div class="modal-section">
+                    <div class="modal-section-title">Named Entities</div>
+                    <div class="modal-text">${entitiesHtml}</div>
+                </div>
+                ` : ''}
+
+                ${geoDisplay ? `
+                <div class="modal-section">
+                    <div class="modal-section-title">Location</div>
+                    <div class="modal-text">${escapeHtml(geoDisplay)}</div>
+                </div>
+                ` : ''}
+
+                <div class="modal-section">
+                    <div class="modal-section-title">Metadata</div>
+                    <div class="modal-text">
+                        <p><strong>Categories:</strong> ${categories.join(', ') || 'None'}</p>
+                        <p><strong>Tone:</strong> ${escapeHtml(tone)}</p>
+                        ${location ? `<p><strong>Primary Location:</strong> ${escapeHtml(location)}</p>` : ''}
+                    </div>
+                </div>
+
+                <div class="modal-section">
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        ${link !== '#' ? `<a href="${link}" target="_blank" class="link-btn">View Original Article</a>` : ''}
+                    </div>
+                </div>
+            `;
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Close Modal
+        function closeModal(event) {
+            if (!event || event.target.id === 'articleModal') {
+                const modal = document.getElementById('articleModal');
+                modal.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
         }
 
         // Utility Functions
@@ -1178,7 +1391,7 @@
             const container = document.getElementById('articlesContainer');
             container.innerHTML = `
                 <div class="empty-state">
-                    <div class="empty-icon">⚠️</div>
+                    <div class="empty-icon">!</div>
                     <div class="empty-title">Error</div>
                     <div class="empty-text">${escapeHtml(message)}</div>
                 </div>
@@ -1234,7 +1447,7 @@
                     const msg = document.createElement('div');
                     msg.className = 'empty-state';
                     msg.innerHTML = `
-                        <div class="empty-icon">🔍</div>
+                        <div class="empty-icon">!</div>
                         <div class="empty-title">No Results</div>
                         <div class="empty-text">No articles match "${escapeHtml(query)}"</div>
                     `;
@@ -1267,7 +1480,7 @@
                     articles = data.articles;
                     displayArticles();
                     updateStats();
-                    alert(`✅ History reset! Processed ${data.articles_processed} articles.`);
+                    alert(`History reset! Processed ${data.articles_processed} articles.`);
                 }
             } catch (error) {
                 alert('Error: ' + error.message);

@@ -9,6 +9,8 @@ from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 import re
 import time
+import ssl
+import certifi
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -16,9 +18,14 @@ logger = logging.getLogger(__name__)
 
 class GeoTagger:
     """Extracts and geocodes locations from news articles"""
-    
+
     def __init__(self):
-        self.geolocator = Nominatim(user_agent="hyperlocal_news_summarizer")
+        # Create SSL context with certifi certificates to fix SSL errors
+        ctx = ssl.create_default_context(cafile=certifi.where())
+        self.geolocator = Nominatim(
+            user_agent="hyperlocal_news_summarizer",
+            ssl_context=ctx
+        )
         self.common_cities = {
             'nagpur': (21.1458, 79.0882),
             'mumbai': (19.0760, 72.8777),

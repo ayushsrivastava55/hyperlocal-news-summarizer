@@ -19,11 +19,11 @@ app = Flask(__name__)
 CORS(app)
 
 # Initialize components (lazy loading for faster startup)
-print("🚀 Starting Hyperlocal News Summarizer...")
-print("📦 Initializing components (models will load on first use)...")
+print("Starting Hyperlocal News Summarizer...")
+print("Initializing components (models will load on first use)...")
 workflow = HyperlocalNewsWorkflow(target_languages=TARGET_LANGUAGES, fast_mode=False)
 report_generator = ReportGenerator()
-print("✅ Application ready! Models will load when processing articles.")
+print("Application ready! Models will load when processing articles.")
 
 # Storage for processed articles (in production, use a database)
 processed_articles = []
@@ -65,16 +65,24 @@ def process_feeds():
         fast = bool(body.get('fast', False))
         offset = int(body.get('offset', 0))
         reset_seen = bool(body.get('reset_seen', False))
+        target_language = body.get('target_language', 'en')  # Get selected language from UI
         global seen_links
         if reset_seen:
             seen_links = set()
         
         if fast and not workflow.fast_mode:
             # enable fast mode for this run
-            globals()['workflow'] = HyperlocalNewsWorkflow(target_languages=['en', 'mr', 'hi'], fast_mode=True)
+            globals()['workflow'] = HyperlocalNewsWorkflow(target_languages=[target_language], fast_mode=True)
         
-        # Process feeds
-        articles = workflow.process_feeds(feed_configs, limit_per_feed=limit_per_feed, max_total=max_total, seen_links=seen_links, offset=offset)
+        # Process feeds with selected language
+        articles = workflow.process_feeds(
+            feed_configs, 
+            limit_per_feed=limit_per_feed, 
+            max_total=max_total, 
+            seen_links=seen_links, 
+            offset=offset,
+            target_language=target_language
+        )
         
         # Enrich articles
         enriched_articles = []
@@ -189,12 +197,13 @@ def api_serp_news():
         max_results = int(payload.get('max_results', 10))
         process_flag = bool(payload.get('process', False))
         fast = bool(payload.get('fast', False))
+        target_language = payload.get('target_language', 'en')  # Get selected language
         if not city:
             return jsonify({'success': False, 'error': 'City is required'}), 400
 
         # Optionally toggle fast mode for processing
         if process_flag and fast and not workflow.fast_mode:
-            globals()['workflow'] = HyperlocalNewsWorkflow(target_languages=['en', 'mr', 'hi'], fast_mode=True)
+            globals()['workflow'] = HyperlocalNewsWorkflow(target_languages=[target_language], fast_mode=True)
 
         articles = fetch_city_news_via_serpapi(city, max_results=max_results)
 
@@ -205,7 +214,7 @@ def api_serp_news():
         # Process and enrich articles through the full pipeline
         enriched_articles = []
         for article in articles:
-            processed = workflow.process_single_article(article)
+            processed = workflow.process_single_article(article, target_language=target_language)
             enriched = workflow.enrich_article(processed)
             enriched['publishing_status'] = f'Processed via SerpAPI for {city}'
             enriched_articles.append(enriched)
@@ -282,6 +291,6 @@ if __name__ == '__main__':
     
     # Use port 5001 to avoid conflict with AirPlay Receiver on macOS
     port = 5001
-    print(f"🌐 Starting server on http://localhost:{port}")
+    print(f"Starting server on http://localhost:{port}")
     app.run(debug=True, host='0.0.0.0', port=port)
 

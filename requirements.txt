@@ -18,6 +18,7 @@ protobuf>=4.25.0
 # Translation
 googletrans==4.0.0rc1
 indic-transliteration==1.9.2
+sacremoses>=0.0.53  # Required for MarianMT tokenization
 
 # NER & Text Processing
 spacy==3.7.2

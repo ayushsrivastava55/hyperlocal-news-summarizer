@@ -30,13 +30,14 @@ def discover_feeds_by_city(city: str, max_results: int = 8) -> List[Dict]:
         return []
 
     queries = [
-        f"site:indiatimes.com rss {city}",
-        f"site:timesofindia.indiatimes.com rssfeeds {city}",
-        f"site:thehindu.com rss {city}",
-        f"site:zeenews.india.com rss {city}",
-        f"site:hindustantimes.com rss {city}",
-        f"site:news {city} inurl:rss",
-        f"{city} news rss",
+        f'site:indiatimes.com "rss feed" {city}',
+        f'site:timesofindia.indiatimes.com rssfeeds {city}',
+        f'site:thehindu.com "rss feed" {city}',
+        f'site:zeenews.india.com "rss feed" {city}',
+        f'site:hindustantimes.com "rss feed" {city}',
+        f'{city} news "rss feed" OR "atom feed"',
+        f'{city} news site inurl:rss OR inurl:feed OR inurl:xml',
+        f'"{city}" news feed xml',
     ]
 
     headers = {"User-Agent": "Mozilla/5.0"}

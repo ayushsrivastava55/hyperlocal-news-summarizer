@@ -126,15 +126,15 @@ class ReportGenerator:
     def format_report_table(self, report: Dict) -> str:
         """
         Format report as markdown table
-        
+
         Args:
             report: Report dictionary
-            
+
         Returns:
             Formatted markdown string
         """
         lines = []
-        lines.append("## 📰 Hyperlocal News Summarizer – Sample Report\n")
+        lines.append("## Hyperlocal News Summarizer – Sample Report\n")
         lines.append(f"**Location:** {report.get('report_metadata', {}).get('location', 'Unknown')}")
         lines.append(f"**Date:** {report.get('report_metadata', {}).get('date', 'Unknown')}")
         lines.append(f"**Total Articles:** {report.get('report_metadata', {}).get('total_articles', 0)}\n")
@@ -185,7 +185,7 @@ class ReportGenerator:
         
         metadata = report.get('report_metadata', {})
         html.append(f"<div class='header'>")
-        html.append(f"<h1>📰 Hyperlocal News Summarizer Report</h1>")
+        html.append(f"<h1>Hyperlocal News Summarizer Report</h1>")
         html.append(f"<p><strong>Location:</strong> {metadata.get('location', 'Unknown')}</p>")
         html.append(f"<p><strong>Date:</strong> {metadata.get('date', 'Unknown')}</p>")
         html.append(f"<p><strong>Total Articles:</strong> {metadata.get('total_articles', 0)}</p>")
